@@ -303,39 +303,30 @@
 
 
             function calculateCO2Saved(distanceKm) {
-                // Average car emission in g CO2 per km
                 const carEmissionPerKm = 150; // Example value, actual values can vary
 
                 return (carEmissionPerKm / 1000) * distanceKm;
             }
 
-            // Function to calculate fuel saved (in liters) when carpooling
             function calculateFuelSaved(distanceKm) {
-                // Average car fuel efficiency in km per liter
                 const carFuelEfficiency = 12; // Example value, actual values can vary
 
                 return distanceKm / carFuelEfficiency;
             }
 
-            // Function to calculate equivalent trees planted
             function calculateTreesPlanted(co2Saved) {
-                // Average CO2 absorption per tree in kg per year
                 const co2AbsorptionPerTree = 10; // Example value, actual values can vary
 
                 return co2Saved / co2AbsorptionPerTree;
             }
 
-            // Function to calculate money saved (based on fuel cost)
             function calculateMoneySaved(fuelSaved) {
-                // Average fuel cost in local currency per liter
                 const fuelCostPerLiter = 100; // Example value, actual values can vary
 
                 return fuelSaved * fuelCostPerLiter;
             }
 
-            // Function to calculate climate impact (combined metric)
             function calculateClimateImpact(co2Saved, treesPlanted, moneySaved) {
-                // Arbitrary weighting for simplicity
                 const co2Weight = 0.5;
                 const treesWeight = 0.2;
                 const moneyWeight = 0.3;
@@ -344,7 +335,6 @@
                 return (co2Weight * co2Saved) + (treesWeight * treesPlanted) - (moneyWeight * moneySaved);
             }
 
-            // Display metrics in the DOM
 
         </script>
 

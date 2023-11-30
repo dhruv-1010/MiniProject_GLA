@@ -61,10 +61,19 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', async (req, res) => {
-    let { email, username, password } = req.body;
-    const user = new User({ email, username });
-    const newUser = await User.register(user, password);
-    res.redirect('/login');
+    try {
+        let { email, username, password } = req.body;
+        const user = new User({ email, username });
+        const newUser = await User.register(user, password);
+        res.redirect('/login');
+    } catch (err) {
+        if (err.name === 'UserExistsError') {
+            return res.status(400).send('Username already exists. Please choose a different one.');
+        } else {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+        }
+    }
 })
 app.get('/login', (req, res) => {
     res.render('auth/login');
@@ -81,35 +90,12 @@ app.get('/logout', function (req, res, next) {
         res.redirect('/login');
     });
 });
-/* 
-the journey api routes
-
-// JourneyDB.insertMany(dummyJourneys);
-
-// You can use this dummy data to insert into your MongoDB database using Mongoose.
-// const Journey = mongoose.model('Journey', journeySchema);
-*/
-// Search for journeys with a partial toLocation match (case-insensitive)
-// let searchInput = 'los ang'; // Replace with the user's search input
-
-Sanitize the search input by removing non-alphabetical characters
-// searchInput = searchInput.replace(/[^a-zA-Z\s]/g, '');
-
-// Journey.find({ toLocation: { $regex: searchInput, $options: 'i' } })
-  // .then(journeys => {
-    // console.log('Matching journeys:', journeys);
-  // })
-  // .catch(error => {
-    // console.error('Error searching journeys:', error);
-  // });
 
 
 app.get('/search', async (req, res) => {
   const searchLocation = req.query.location;
   try {
-    // Construct a case-insensitive regex for search
     const regex = new RegExp(searchLocation, 'i');
-    // Perform the search query using the regex
     const journeyObj = await JourneyDB.find({
       $or: [
         { fromLocation: regex },
@@ -200,7 +186,6 @@ app.post('/send-emails', async (req, res) => {
 
         for (const journey of journeys) {
             const matchingJourneys = journeys.filter(otherJourney => {
-                // Match criteria using journey's fromLocation and toLocation
                 return (
                     otherJourney.fromLocation === journey.fromLocation &&
                     otherJourney.toLocation === journey.toLocation &&
