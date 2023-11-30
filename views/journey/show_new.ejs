@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>journies</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Poppins:wght@600;800&family=Signika:wght@600&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        #details {
+            display: grid;
+            grid-template-columns: 2fr 4fr;
+        }
+
+        img {
+            height: 45vw;
+        }
+
+        table {
+            border: 1px solid #eeeeee;
+            border-collapse: collapse;
+
+            padding: 0;
+            max-width: 500px;
+            margin: 20px;
+
+            table-layout: fixed;
+        }
+
+        table caption {
+            font-size: 1.5em;
+            margin: .5em 0 .75em;
+        }
+
+        thead td {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+
+            font-size: 1.2rem;
+        }
+
+        table tr {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: .35em;
+        }
+
+        table th,
+        table td {
+            padding: .625em;
+            text-align: center;
+        }
+
+        table th {
+            font-size: .85em;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background: rgba(123, 153, 218, .1);
+        }
+
+        #navbar {
+            display: grid;
+            grid-template-columns: 3fr 8fr 1fr 1fr;
+            background: #ccc;
+        }
+
+        body {
+            font-family: 'Signika', cursive;
+        }
+
+        #list {
+            display: flex;
+            list-style: none;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            padding: 10px;
+        }
+
+        #head {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2vw;
+            font-family: 'DM Serif Display', serif;
+        }
+
+        #list li {
+            margin: 0 20px;
+        }
+
+        #list a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        #list li:hover {
+            border-bottom: 2px solid black;
+        }
+
+        #navbar a {
+            padding-top: 1vw;
+        }
+        #metrics{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .divs{
+            font-size: 2vw;
+            margin:10px;
+            
+        }
+    </style>
+    <!-- <link rel="stylesheet" href="/public/app.css"> -->
+</head>
+
+<body>
+    <div id="parent">
+        <nav id="navbar">
+            <h1 id="head">EcoRides</h1>
+            <ul id="list">
+                <a href="/home">
+                    <li id="home">Home</li>
+                </a>
+                <a href="/route">
+                    <li>
+                        Return to List
+                    </li>
+
+                </a>
+                <a href="#">
+                    <li id="contact">Contact Volunteers!!</li>
+                </a>
+            </ul>
+        </nav>
+        <div id="details">
+            <div id="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Name :</td>
+                            <td>
+                                <%=found.name%>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>
+                            Date
+                        </td>
+
+                        <td class="points">
+                            <%=found.date.toDateString()%>
+                        </td>
+                    </tr>
+                    </tr>
+                    <tr>
+                        <td>
+                            From
+                        </td>
+                        <td class="name" id="fromLocation">
+                            <%=found.fromLocation%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            To
+                        </td>
+                        <td class="name" id="toLocation">
+                            <%=found.toLocation%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            E-mail
+                        </td>
+                        <td class="name">
+                            <%=found.email%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Phone Number
+                        </td>
+                        <td class="name">
+                            <%=found.mobile%>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div id="distance">
+                    Distance Travelled: Calculating....
+                </div>
+                <div id="metrics">
+                    <p class="divs" id="co2Saved">CO2 Emissions Saved: Calculating...</p>
+                    <p  class="divs" id="fuelSaved">Fuel Saved: Calculating...</p>
+                    <p class="divs" id="treesPlanted">Trees Planted Equivalent: Calculating...</p>
+                    <p class="divs" id="moneySaved">Money Saved: Calculating...</p>
+                    <p class="divs" id="climateHelped">Climate Impact: Calculating...</p>
+                </div>
+            </div>
+            <div id="map" style="width:100%; height: 90vh;"></div>
+        </div>
+        <script type="text/javascript"
+            src="https://www.bing.com/api/maps/mapcontrol?key=AniVfI5AET7pDeQkDfeR6pwG6PI2ErvIjlymzjY9VrGvas1UDUMePlxhqwTSCHW1"></script>
+        <script>
+            const apiKey = 'AniVfI5AET7pDeQkDfeR6pwG6PI2ErvIjlymzjY9VrGvas1UDUMePlxhqwTSCHW1';
+            const city1 = document.getElementById('fromLocation').textContent;
+            const city2 = document.getElementById('toLocation').textContent;
+
+            let coords1, coords2;
+
+            const geocodeUrl1 = `https://dev.virtualearth.net/REST/v1/Locations?q=${encodeURIComponent(city1)}&key=${apiKey}`;
+            const geocodeUrl2 = `https://dev.virtualearth.net/REST/v1/Locations?q=${encodeURIComponent(city2)}&key=${apiKey}`;
+
+            const distanceDiv = document.getElementById('distance');
+
+            Promise.all([
+                fetch(geocodeUrl1).then(response => response.json()).then(data => data.resourceSets[0].resources[0].point.coordinates),
+                fetch(geocodeUrl2).then(response => response.json()).then(data => data.resourceSets[0].resources[0].point.coordinates)
+            ]).then(([result1, result2]) => {
+                coords1 = { lat: result1[0], lng: result1[1] };
+                coords2 = { lat: result2[0], lng: result2[1] };
+
+                const distance = calculateDistance(coords1.lat, coords1.lng, coords2.lat, coords2.lng);
+
+                distanceDiv.textContent = `Distance between ${city1} and ${city2}: ${distance.toFixed(2)} kilometers`;
+
+                
+                distanceDiv.textContent = `Distance between ${city1} and ${city2}: ${distance.toFixed(2)} kilometers`;
+                const co2SavedElement = document.getElementById('co2Saved');
+                const fuelSavedElement = document.getElementById('fuelSaved');
+                const treesPlantedElement = document.getElementById('treesPlanted');
+                const moneySavedElement = document.getElementById('moneySaved');
+                const climateHelpedElement = document.getElementById('climateHelped');
+
+                // const distance = calculateDistance(coords1.lat, coords1.lng, coords2.lat, coords2.lng);
+                const co2Saved = calculateCO2Saved(distance);
+                const fuelSaved = calculateFuelSaved(distance);
+                const treesPlanted = calculateTreesPlanted(co2Saved);
+                const moneySaved = calculateMoneySaved(fuelSaved);
+                const climateHelped = calculateClimateImpact(co2Saved, treesPlanted, moneySaved);
+
+                co2SavedElement.textContent = `CO2 Emissions Saved: ${co2Saved.toFixed(2)} kg`;
+                fuelSavedElement.textContent = `Fuel Saved: ${fuelSaved.toFixed(2)} liters`;
+                treesPlantedElement.textContent = `Trees Planted Equivalent: ${treesPlanted.toFixed(2)}`;
+                moneySavedElement.textContent = `Money Saved: ₹ ${moneySaved.toFixed(2)}`;
+                climateHelpedElement.textContent = `Climate Impact: ${climateHelped.toFixed(2)}`;
+
+
+                const map = new Microsoft.Maps.Map('#map', {
+                    credentials: apiKey,
+                    center: new Microsoft.Maps.Location(0, 0),
+                    zoom: 2
+                });
+
+                Microsoft.Maps.loadModule('Microsoft.Maps.Directions', function () {
+                    const directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
+
+                    const waypoint1 = new Microsoft.Maps.Directions.Waypoint({ location: new Microsoft.Maps.Location(coords1.lat, coords1.lng) });
+                    const waypoint2 = new Microsoft.Maps.Directions.Waypoint({ location: new Microsoft.Maps.Location(coords2.lat, coords2.lng) });
+
+                    directionsManager.addWaypoint(waypoint1);
+                    directionsManager.addWaypoint(waypoint2);
+
+                    directionsManager.setRenderOptions({ itineraryContainer: document.getElementById('directionsPanel') });
+                    directionsManager.calculateDirections();
+                });
+            }).catch(error => {
+                console.error('Error:', error);
+                distanceDiv.textContent = 'An error occurred. Please try again.';
+            });
+
+            // Rest of your functions and calculation        
+
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const earthRadius = 6371; // Radius of the Earth in kilometers
+                const dLat = degToRad(lat2 - lat1);
+                const dLon = degToRad(lon2 - lon1);
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return earthRadius * c;
+            }
+
+            function degToRad(deg) {
+                return deg * (Math.PI / 180);
+
+            }
+
+
+            function calculateCO2Saved(distanceKm) {
+                // Average car emission in g CO2 per km
+                const carEmissionPerKm = 150; // Example value, actual values can vary
+
+                return (carEmissionPerKm / 1000) * distanceKm;
+            }
+
+            // Function to calculate fuel saved (in liters) when carpooling
+            function calculateFuelSaved(distanceKm) {
+                // Average car fuel efficiency in km per liter
+                const carFuelEfficiency = 12; // Example value, actual values can vary
+
+                return distanceKm / carFuelEfficiency;
+            }
+
+            // Function to calculate equivalent trees planted
+            function calculateTreesPlanted(co2Saved) {
+                // Average CO2 absorption per tree in kg per year
+                const co2AbsorptionPerTree = 10; // Example value, actual values can vary
+
+                return co2Saved / co2AbsorptionPerTree;
+            }
+
+            // Function to calculate money saved (based on fuel cost)
+            function calculateMoneySaved(fuelSaved) {
+                // Average fuel cost in local currency per liter
+                const fuelCostPerLiter = 100; // Example value, actual values can vary
+
+                return fuelSaved * fuelCostPerLiter;
+            }
+
+            // Function to calculate climate impact (combined metric)
+            function calculateClimateImpact(co2Saved, treesPlanted, moneySaved) {
+                // Arbitrary weighting for simplicity
+                const co2Weight = 0.5;
+                const treesWeight = 0.2;
+                const moneyWeight = 0.3;
+
+                // Combine metrics and apply weights
+                return (co2Weight * co2Saved) + (treesWeight * treesPlanted) - (moneyWeight * moneySaved);
+            }
+
+            // Display metrics in the DOM
+
+        </script>
+
+
+</body>
+
+</html>
